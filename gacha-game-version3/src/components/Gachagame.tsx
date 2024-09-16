@@ -274,15 +274,21 @@ function GachaGameContent() {
                 arguments: [
                     tx.object(MINT_RECORD),
                     tx.pure.string(doll.image),
-                    tx.pure.address(account!.address)
+                    tx.pure.address(account.address)
                 ],
             });
 
-            const result = await signAndExecuteTransaction({
-                transaction: tx,
+            const response = await new Promise<SuiTransactionBlockResponse>((resolve, reject) => {
+                signAndExecuteTransaction(
+                    { transaction: tx },
+                    {
+                        onSuccess: (result) => resolve(result),
+                        onError: (error) => reject(error),
+                    }
+                );
             });
 
-            if (result && result.effects?.status?.status === "success") {
+            if (response.effects?.status?.status === "success") {
                 toast({
                     title: language === 'en' ? "Minting Successful" : "铸造成功",
                     description: language === 'en' ? `You have minted ${doll.name} as an NFT and added it to your wallet!` : `您已将${doll.name}铸造为NFT并添加到您的钱包中！`,
